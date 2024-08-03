@@ -1,0 +1,6 @@
+[submodule "support-ticket-desk_frontend"]
+	path = support-ticket-desk_frontend
+	url = git@github.com:d15c0d3r/support-ticket-desk_frontend.git
+[submodule "support-ticket-desk_backend"]
+	path = support-ticket-desk_backend
+	url = git@github.com:d15c0d3r/support-ticket-desk_backend.git

@@ -1,0 +1,54 @@
+version: "3.2"
+services:
+  std_db:
+    image: postgres
+    container_name: std_db_c
+    ports:
+      - "5000:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: TicketDesk
+    networks:
+      - nw
+    volumes:
+      - ./support-ticket-desk_db/postgres-data:/var/lib/postgresql/data
+      - ./support-ticket-desk_db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
+      interval: 5s
+      retries: 5
+      timeout: 10s
+
+  std_be:
+    build: ./support-ticket-desk_backend
+    depends_on:
+      std_db:
+        condition: service_healthy
+    container_name: std_be_c
+    environment:
+      - DATABASE_URL=postgresql://postgres:root@std_db:5432/TicketDesk?schema=public
+      - SENDGRID_API_KEY=SEND_GRID_API_KEY
+    networks:
+      - nw
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./support-ticket-desk_backend:/app
+      - /app/node_modules
+
+  std_fe:
+    build: ./support-ticket-desk_frontend
+    container_name: std_fe_c
+    environment:
+      - DOMAIN=http://localhost:8080/apis
+    ports:
+      - "3000:3000"
+    networks:
+      - nw
+    volumes:
+      - ./support-ticket-desk_frontend:/app
+      - /app/node_modules
+
+networks:
+  nw: {}
